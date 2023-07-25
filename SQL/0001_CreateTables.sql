@@ -12,3 +12,17 @@ CREATE TABLE raw_txns (
     ,TransactionType    nvarchar(max)
     );
 GO
+
+IF OBJECT_ID('std_txns', N'U') IS NULL
+CREATE TABLE std_txns (
+     BSBNumber          nvarchar(max)
+    ,AccountNumber      nvarchar(max)
+    ,TransactionDate    date
+    ,Narration          nvarchar(max)
+    ,Cheque             money
+    ,Debit              money
+    ,Credit             money
+    ,Balance            money
+    ,TransactionType    nvarchar(max)
+    );
+GO
