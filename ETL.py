@@ -17,7 +17,7 @@
 # CSV Data Ingestion
 
 import pandas as pd
-import glob
+import glob2
 import shutil
 import os
 from dotenv import load_dotenv
