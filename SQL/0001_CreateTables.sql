@@ -1,8 +1,8 @@
 --USE [TxnRecon]
 
-DROP TABLE IF EXISTS raw_txns
+DROP TABLE IF EXISTS etl.raw_txns
 ;
-CREATE TABLE raw_txns (
+CREATE TABLE etl.raw_txns (
      BSBNumber          varchar(5000)
     ,AccountNumber      varchar(5000)
     ,TransactionDate    varchar(5000)
@@ -14,8 +14,8 @@ CREATE TABLE raw_txns (
     ,TransactionType    varchar(5000)
     ,SourceFile         varchar(5000)
     );
-DROP TABLE IF EXISTS stg_txns;
-CREATE TABLE stg_txns (
+DROP TABLE IF EXISTS etl.stg_txns;
+CREATE TABLE etl.stg_txns (
      STG_ID             SERIAL PRIMARY KEY
     ,BSBNumber          varchar(5000)
     ,AccountNumber      varchar(5000)
@@ -30,8 +30,8 @@ CREATE TABLE stg_txns (
     ,FileRank           int
     );
 
-DROP TABLE IF EXISTS std_txns;
-CREATE TABLE std_txns (
+DROP TABLE IF EXISTS etl.std_txns;
+CREATE TABLE etl.std_txns (
      ID                 SERIAL PRIMARY KEY
     ,BSBNumber          varchar(5000)
     ,AccountNumber      varchar(5000)
