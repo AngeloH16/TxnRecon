@@ -45,4 +45,3 @@ CREATE TABLE std_txns (
     ,load_dt            timestamp 
     ,SourceFile         varchar(5000)
     );
-GO
