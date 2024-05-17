@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[6]:
+# In[1]:
 
 
 # CSV Data Ingestion
@@ -16,19 +16,26 @@ import psycopg2
 from psycopg2 import Error
 import psycopg2.extras as extras
 import numpy as np
+from pathlib import Path
+from tkinter import filedialog
 
 
 # Concat all CSVs in data file to one df
 
-# In[7]:
+# In[2]:
 
 
-path = 'Data'
-csv_files = glob.glob(path+"/*.csv")
+directory = filedialog.askdirectory()
+files = glob.glob(directory+"/*.csv")
+
+
+# In[3]:
+
 
 df_raw_data = pd.DataFrame()
 
-for csv in csv_files:
+
+for csv in files:
     frame = pd.read_csv(csv)
     frame['SourceFile'] = os.path.basename(csv)
     df_raw_data = pd.concat([df_raw_data,frame])
@@ -37,7 +44,7 @@ for csv in csv_files:
 
 # Clean column names for whitespace
 
-# In[8]:
+# In[4]:
 
 
 df_raw_data.columns = [c.replace(' ', '') for c in df_raw_data.columns]
@@ -45,7 +52,7 @@ df_raw_data.columns = [c.replace(' ', '') for c in df_raw_data.columns]
 
 # Replace Nulls
 
-# In[9]:
+# In[5]:
 
 
 df_raw_data_clean = df_raw_data.replace(np.nan, '', regex=True)
@@ -53,13 +60,13 @@ df_raw_data_clean = df_raw_data.replace(np.nan, '', regex=True)
 
 # Anonymise data
 
-# In[10]:
+# In[6]:
 
 
 df_raw_data_clean["AccountNumber"] = '************'+df_raw_data_clean["AccountNumber"].str[-4:]
 
 
-# In[11]:
+# In[7]:
 
 
 df_raw_data_clean["SourceFile"] = df_raw_data_clean["SourceFile"].str[-26:]
@@ -69,7 +76,7 @@ df_raw_data_clean["SourceFile"] = df_raw_data_clean["SourceFile"].str[-26:]
 
 # Test Connect to DB
 
-# In[12]:
+# In[8]:
 
 
 try:
@@ -82,14 +89,14 @@ try:
 
     # Create a cursor to perform database operations
     cursor = connection.cursor()
-    # Print PostgreSQL details
-    print("PostgreSQL server information")
-    print(connection.get_dsn_parameters(), "\n")
+    # # Print PostgreSQL details
+    # print("PostgreSQL server information")
+    # print(connection.get_dsn_parameters(), "\n")
     # Executing a SQL query
     cursor.execute("SELECT version();")
     # Fetch result
     record = cursor.fetchone()
-    print("You are connected to - ", record, "\n")
+    print("Testing connection to - ", record, "\n")
 
 except (Exception, Error) as error:
     print("Error while connecting to PostgreSQL", error)
@@ -102,7 +109,7 @@ finally:
 
 # Funciton for insert into raw
 
-# In[13]:
+# In[9]:
 
 
 def execute_values(conn, df, table):
@@ -127,7 +134,7 @@ def execute_values(conn, df, table):
 
 # Insert into Raw
 
-# In[14]:
+# In[10]:
 
 
 connection = psycopg2.connect(user=os.getenv('POSTGRES_USER'),
@@ -141,7 +148,7 @@ execute_values(connection,df_raw_data_clean,'etl.raw_txns')
 
 # Function for calling ETL proc
 
-# In[15]:
+# In[11]:
 
 
 def execute_proc(conn, procname): 
@@ -171,7 +178,7 @@ def execute_proc(conn, procname):
 
 # exec proc
 
-# In[16]:
+# In[12]:
 
 
 connection = psycopg2.connect(user=os.getenv('POSTGRES_USER'),
@@ -184,29 +191,29 @@ execute_proc(connection,'etl.RawToStd()')
 
 
 
-# Move files to archive
-
-# In[17]:
+# In[13]:
 
 
-source_dir = 'Data'
-target_dir = 'Data/Old'
+# # Move files to archive
+# # NOTE: Not used for dev
+# source_dir = 'Data'
+# target_dir = 'Data/Old'
     
-file_names = os.listdir(source_dir)
+# file_names = os.listdir(source_dir)
     
-for file_name in file_names:
-    shutil.move(os.path.join(source_dir, file_name), target_dir)
+# for file_name in file_names:
+#     shutil.move(os.path.join(source_dir, file_name), target_dir)
 
 
 # Convert to py script
 
-# In[ ]:
+# In[14]:
 
 
 get_ipython().system('jupyter nbconvert --to script ETL.ipynb')
 
 
-# In[18]:
+# In[15]:
 
 
 # server = os.getenv('SQL_SERVER')
@@ -216,7 +223,7 @@ get_ipython().system('jupyter nbconvert --to script ETL.ipynb')
 # cursor = cnxn.cursor()
 
 
-# In[19]:
+# In[16]:
 
 
 # cursor.execute('call etl.RawToStd()')
@@ -224,7 +231,7 @@ get_ipython().system('jupyter nbconvert --to script ETL.ipynb')
 # connection.close()  
 
 
-# In[20]:
+# In[17]:
 
 
 # for index, row in df_raw_data_clean.iterrows():
@@ -232,14 +239,14 @@ get_ipython().system('jupyter nbconvert --to script ETL.ipynb')
 # cnxn.commit()
 
 
-# In[21]:
+# In[18]:
 
 
 # cursor.execut   e("EXEC etl.RawToStd")
 # cnxn.commit()
 
 
-# In[22]:
+# In[19]:
 
 
 # procname = 'etl.RawToStd()'
