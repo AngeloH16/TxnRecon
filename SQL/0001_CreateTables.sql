@@ -45,3 +45,14 @@ CREATE TABLE etl.std_txns (
     ,load_dt            timestamp 
     ,SourceFile         varchar(5000)
     );
+
+DROP TABLE IF EXISTS etl.log;
+CREATE TABLE etl.log (
+     ID                 SERIAL PRIMARY KEY
+    ,CalledProc          varchar(5000)
+    ,AffectedTable      varchar(5000)
+    ,RecordCount    bigint
+    ,load_dt          timestamp
+    )
+    ;
+    COMMIT;

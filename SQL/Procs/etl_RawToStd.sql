@@ -23,7 +23,8 @@ as $$
             ,cast(NULLIF(Balance,'')as Money) as Balance
             ,NULLIF(TransactionType,'') as TransactionType
             ,NULLIF(sourcefile,'') as SourceFile
-    from etl.raw_txns;
+    from etl.raw_txns
+    ;
 
 
 
@@ -109,7 +110,19 @@ from ( select *, ROW_NUMBER () over (partition by BSBNumber
                                         and COALESCE(stg.TransactionType,'') = COALESCE(std.TransactionType,'')
                 where std.ID is null) x
                 ;
-
+    
+insert into etl.log(
+        CalledProc
+        ,AffectedTable  
+        ,RecordCount
+        ,load_dt
+        )
+select   'etl.RawToStd'
+        ,'etl.std_txns'
+        ,count(0)
+        ,now()
+from TxnInsert
+;
     DROP TABLE IF EXISTS  RANK_CTE;
     DROP TABLE IF EXISTS  TxnInsert;
     truncate table etl.stg_txns;
