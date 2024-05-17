@@ -19,7 +19,7 @@ def connection_test(connection):
         cursor.execute("SELECT version();")
         # Fetch result
         record = cursor.fetchone()
-        print("Testing connection to - ", record, "\n")
+        print("Testing connection to - ", connection, "\n")
 
     except (Exception, Error) as error:
         print("Error while connecting to PostgreSQL", error)
@@ -27,7 +27,7 @@ def connection_test(connection):
         if (conn):
             cursor.close()
             conn.close()
-            print("PostgreSQL connection is closed")
+            # print("PostgreSQL connection is closed")
 
 
 def insert_values(conn, df, table):
@@ -46,7 +46,7 @@ def insert_values(conn, df, table):
         conn.rollback()
         cursor.close()
         return 1
-    print("the dataframe is inserted")
+    # print("the dataframe is inserted")
     cursor.close()
 
 def execute_proc(conn, procname): 
@@ -59,7 +59,7 @@ def execute_proc(conn, procname):
         conn.commit()
         cursor.close()  
         conn.close()  
-        print('Executed ',procname,' Successfully')
+        #print('Executed ',procname,' Successfully')
         
     except (Exception, psycopg2.DatabaseError) as error: 
         print("Error while connecting to PostgreSQL", error) 
@@ -70,7 +70,7 @@ def execute_proc(conn, procname):
         if conn: 
             cursor.close()  
             conn.close()
-            print("PostgreSQL connection is closed") 
+            #print("PostgreSQL connection is closed") 
 
 def postgresql_to_dataframe(conn, select_query, column_names):
     """
