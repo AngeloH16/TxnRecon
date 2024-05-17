@@ -54,25 +54,31 @@ from ( select *, ROW_NUMBER () over (partition by BSBNumber
 
 
     -- select max date from previously ingested tables
-    DROP TABLE IF EXISTS  TxnInsert;
+        insert into etl.log(
+                CalledProc
+                ,AffectedTable  
+                ,RecordCount
+                ,load_dt
+                )
+        select   'etl.RawToStd'
+                ,'etl.std_txns'
+                ,count(0)
+                ,now()
+        from (select stg.* from etl.stg_txns stg
+                                full join etl.std_txns std 
+                                on              COALESCE(stg.BSBNumber,'')      = COALESCE(std.BSBNumber      ,'')
+                                                and COALESCE(stg.AccountNumber  ,'') = COALESCE(std.AccountNumber  ,'')
+                                                and COALESCE(stg.TransactionDate,'31-12-2100') = COALESCE(std.TransactionDate,'31-12-2100')
+                                                and COALESCE(stg.Narration      ,'') = COALESCE(std.Narration      ,'')
+                                                and COALESCE(stg.Cheque         ,'') = COALESCE(std.Cheque         ,'')
+                                                and COALESCE(stg.Debit          ,'') = COALESCE(std.Debit          ,'')
+                                                and COALESCE(stg.Credit         ,'') = COALESCE(std.Credit         ,'')
+                                                and COALESCE(stg.Balance        ,'') = COALESCE(std.Balance        ,'')
+                                                and COALESCE(stg.TransactionType,'') = COALESCE(std.TransactionType,'')
+                        where std.ID is null) x
+        
 
-    select * into  temp table TxnInsert
-    from (
-    select stg.* from etl.stg_txns stg
-    full join etl.std_txns std 
-    on              COALESCE(stg.BSBNumber,'')      = COALESCE(std.BSBNumber      ,'')
-                and COALESCE(stg.AccountNumber  ,'') = COALESCE(std.AccountNumber  ,'')
-                and COALESCE(stg.TransactionDate,'31-12-2100') = COALESCE(std.TransactionDate,'31-12-2100')
-                and COALESCE(stg.Narration      ,'') = COALESCE(std.Narration      ,'')
-                and COALESCE(stg.Cheque         ,'') = COALESCE(std.Cheque         ,'')
-                and COALESCE(stg.Debit          ,'') = COALESCE(std.Debit          ,'')
-                and COALESCE(stg.Credit         ,'') = COALESCE(std.Credit         ,'')
-                and COALESCE(stg.Balance        ,'') = COALESCE(std.Balance        ,'')
-                and COALESCE(stg.TransactionType,'') = COALESCE(std.TransactionType,'')
-    where std.ID is null
-    ) as x
-
-    ;
+        ;
 
     insert into etl.std_txns (  
                 BSBNumber      
@@ -111,20 +117,8 @@ from ( select *, ROW_NUMBER () over (partition by BSBNumber
                 where std.ID is null) x
                 ;
     
-insert into etl.log(
-        CalledProc
-        ,AffectedTable  
-        ,RecordCount
-        ,load_dt
-        )
-select   'etl.RawToStd'
-        ,'etl.std_txns'
-        ,count(0)
-        ,now()
-from TxnInsert
-;
-    DROP TABLE IF EXISTS  RANK_CTE;
-    DROP TABLE IF EXISTS  TxnInsert;
+
+
     truncate table etl.stg_txns;
     truncate table  etl.raw_txns;
     --COMMIT;

@@ -141,75 +141,16 @@ connection = psycopg2.connect(user=os.getenv('POSTGRES_USER'),
 log = postgresql_to_dataframe(connection, query, column_names)
 
 
-# In[24]:
+# In[27]:
 
 
-print(log.recordcount.map(str)+' rows inserted into '+log.AffectedTable.map(str))
+print(log.recordcount.map(str)+' rows inserted into '+log.AffectedTable.map(str)+' by '+log.calledproc.map(str))
 
 
 # Convert to py script
 
-# In[14]:
+# In[25]:
 
 
 get_ipython().system('jupyter nbconvert --to script ETL.ipynb')
-
-
-# In[15]:
-
-
-# server = os.getenv('SQL_SERVER')
-# database = os.getenv('SQL_DATABASE')
-# cnxn_str = 'DRIVER={SQL Server};server='+server+';Database='+database+';Trusted_Connection=yes;'
-# cnxn = pyodbc.connect(cnxn_str)
-# cursor = cnxn.cursor()
-
-
-# In[16]:
-
-
-# cursor.execute('call etl.RawToStd()')
-# cursor.close()  
-# connection.close()  
-
-
-# In[17]:
-
-
-# for index, row in df_raw_data_clean.iterrows():
-#     cursor.execute("Insert into raw_txns (BSBNumber,AccountNumber,TransactionDate,Narration,Cheque,Debit,Credit,Balance,TransactionType,SourceFile) Values (?,?,?,?,?,?,?,?,?,?)", row.BSBNumber,row.AccountNumber,row.TransactionDate,row.Narration,row.Cheque,row.Debit,row.Credit,row.Balance,row.TransactionType,row.SourceFile)
-# cnxn.commit()
-
-
-# In[18]:
-
-
-# cursor.execut   e("EXEC etl.RawToStd")
-# cnxn.commit()
-
-
-# In[19]:
-
-
-# procname = 'etl.RawToStd()'
-# call = 'call '+procname
-# cursor = connection.cursor()
-# cursor.execute(call)
-# connection.commit()
-# cursor.close()  
-# connection.close()  
-
-
-# In[ ]:
-
-
-# # Move files to archive
-# # NOTE: Not used for dev
-# source_dir = 'Data'
-# target_dir = 'Data/Old'
-    
-# file_names = os.listdir(source_dir)
-    
-# for file_name in file_names:
-#     shutil.move(os.path.join(source_dir, file_name), target_dir)
 
