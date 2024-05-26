@@ -1,6 +1,6 @@
-CREATE OR REPLACE PROCEDURE etl.RawToStd()
-LANGUAGE SQL
-as $$
+CREATE OR REPLACE PROCEDURE etl.rawtostd()
+LANGUAGE sql
+AS $BODY$
     insert into etl.stg_txns (  
                 BSBNumber      
                 ,AccountNumber  
@@ -26,10 +26,6 @@ as $$
     from etl.raw_txns
     ;
 
-
-
-
- -- Clean for duplicates in stg
 update etl.stg_txns as t 
 set filerank = r.rank
 from ( select *, ROW_NUMBER () over (partition by BSBNumber      
@@ -42,7 +38,6 @@ from ( select *, ROW_NUMBER () over (partition by BSBNumber
                 ,Balance        
                 ,TransactionType
                 order by sourcefile desc) as rank
-        --into  temp table RANK_CTE
                 from etl.stg_txns) as r  
         where r.stg_id = t.stg_id
 
@@ -53,7 +48,6 @@ from ( select *, ROW_NUMBER () over (partition by BSBNumber
     ;
 
 
-    -- select max date from previously ingested tables
         insert into etl.log(
                 CalledProc
                 ,AffectedTable  
@@ -121,6 +115,7 @@ from ( select *, ROW_NUMBER () over (partition by BSBNumber
 
     truncate table etl.stg_txns;
     truncate table  etl.raw_txns;
-    --COMMIT;
 
-$$;
+$BODY$;
+ALTER PROCEDURE etl.rawtostd()
+    OWNER TO postgres;
