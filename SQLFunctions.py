@@ -19,7 +19,7 @@ def connection_test(connection):
         cursor.execute("SELECT version();")
         # Fetch result
         record = cursor.fetchone()
-        print("Testing connection to - ", connection, "\n")
+        print("Connection Test Passed", connection, "\n")
 
     except (Exception, Error) as error:
         print("Error while connecting to PostgreSQL", error)
