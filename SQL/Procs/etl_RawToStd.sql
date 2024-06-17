@@ -12,7 +12,7 @@ AS $$
                 ,Balance        
                 ,TransactionType
                 ,SourceFile)
--- TEST COMMENT
+
     select   NULLIF(BSBNumber,'') as BSBNumber
             ,NULLIF(AccountNumber,'') as AccountNumber
             ,cast(TransactionDate as date) as TransactionDate
@@ -25,7 +25,7 @@ AS $$
             ,NULLIF(sourcefile,'') as SourceFile
     from etl.raw_txns
     ;
----COMMIT TRANSACTION;
+
 
 update etl.stg_txns as t 
 set filerank = r.rank
@@ -43,11 +43,11 @@ from ( select *, ROW_NUMBER () over (partition by BSBNumber
         where r.stg_id = t.stg_id
 
 ;        
---COMMIT TRANSACTION;
+
     delete from  etl.stg_txns
     where FileRank > 1
     ;
---COMMIT TRANSACTION;
+
 
         insert into etl.log(
                 CalledProc
@@ -74,7 +74,7 @@ from ( select *, ROW_NUMBER () over (partition by BSBNumber
         
 
         ;
---COMMIT TRANSACTION;
+
     insert into etl.std_txns (  
                 BSBNumber      
                 ,AccountNumber  
@@ -112,11 +112,5 @@ from ( select *, ROW_NUMBER () over (partition by BSBNumber
                 where std.ID is null) x
                 ;
     
---COMMIT TRANSACTION;
 
-    --truncate table etl.stg_txns;
-    --COMMIT TRANSACTION;
-    --truncate table  etl.raw_txns;
-    --COMMIT TRANSACTION;
---COMMIT TRANSACTION;
 $$;

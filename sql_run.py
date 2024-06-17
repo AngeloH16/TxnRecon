@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[27]:
+# In[34]:
 
 
 import pandas as pd
@@ -13,7 +13,7 @@ from SQLFunctions import *
 
 # Test Connection
 
-# In[29]:
+# In[35]:
 
 
 connection = psycopg2.connect(user=os.getenv('POSTGRES_USER'),
@@ -26,7 +26,7 @@ connection_test(connection)
 
 # Loop over procs folder
 
-# In[39]:
+# In[36]:
 
 
 folder_path = 'SQL/Procs'
@@ -38,7 +38,7 @@ for filename in os.listdir(folder_path):
         with open(file_path, 'r') as file:
             # Do something with the file
             sqlFile = file.read()
-            clean_sqlfile = sqlFile.replace('\n', '  ')
+            clean_sqlfile = sqlFile + 'COMMIT TRANSACTION;'
             connection = psycopg2.connect(user=os.getenv('POSTGRES_USER'),
                                   password=os.getenv('POSTGRES_PASSWORD'),
                                   host=os.getenv('POSTGRES_HOST'),
@@ -54,7 +54,7 @@ for filename in os.listdir(folder_path):
 
 # Convert to py script
 
-# In[ ]:
+# In[38]:
 
 
 get_ipython().system('jupyter nbconvert --to script sql_run.ipynb')
