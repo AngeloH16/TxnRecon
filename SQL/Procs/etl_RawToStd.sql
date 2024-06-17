@@ -1,6 +1,6 @@
 CREATE OR REPLACE PROCEDURE etl.rawtostd()
 LANGUAGE sql
-AS $BODY$
+AS $$
     insert into etl.stg_txns (  
                 BSBNumber      
                 ,AccountNumber  
@@ -12,7 +12,7 @@ AS $BODY$
                 ,Balance        
                 ,TransactionType
                 ,SourceFile)
-
+-- TEST COMMENT
     select   NULLIF(BSBNumber,'') as BSBNumber
             ,NULLIF(AccountNumber,'') as AccountNumber
             ,cast(TransactionDate as date) as TransactionDate
@@ -25,6 +25,7 @@ AS $BODY$
             ,NULLIF(sourcefile,'') as SourceFile
     from etl.raw_txns
     ;
+---COMMIT TRANSACTION;
 
 update etl.stg_txns as t 
 set filerank = r.rank
@@ -42,11 +43,11 @@ from ( select *, ROW_NUMBER () over (partition by BSBNumber
         where r.stg_id = t.stg_id
 
 ;        
-
+--COMMIT TRANSACTION;
     delete from  etl.stg_txns
     where FileRank > 1
     ;
-
+--COMMIT TRANSACTION;
 
         insert into etl.log(
                 CalledProc
@@ -73,7 +74,7 @@ from ( select *, ROW_NUMBER () over (partition by BSBNumber
         
 
         ;
-
+--COMMIT TRANSACTION;
     insert into etl.std_txns (  
                 BSBNumber      
                 ,AccountNumber  
@@ -111,11 +112,11 @@ from ( select *, ROW_NUMBER () over (partition by BSBNumber
                 where std.ID is null) x
                 ;
     
+--COMMIT TRANSACTION;
 
-
-    truncate table etl.stg_txns;
-    truncate table  etl.raw_txns;
-
-$BODY$;
-ALTER PROCEDURE etl.rawtostd()
-    OWNER TO postgres;
+    --truncate table etl.stg_txns;
+    --COMMIT TRANSACTION;
+    --truncate table  etl.raw_txns;
+    --COMMIT TRANSACTION;
+--COMMIT TRANSACTION;
+$$;

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[15]:
 
 
 # CSV Data Ingestion
@@ -23,14 +23,14 @@ from tkinter import filedialog
 
 # Concat all CSVs in data file to one df
 
-# In[2]:
+# In[16]:
 
 
 directory = filedialog.askdirectory()
 files = glob.glob(directory+"/*.csv")
 
 
-# In[3]:
+# In[17]:
 
 
 df_raw_data = pd.DataFrame()
@@ -45,7 +45,7 @@ for csv in files:
 
 # Clean column names for whitespace
 
-# In[4]:
+# In[18]:
 
 
 df_raw_data.columns = [c.replace(' ', '') for c in df_raw_data.columns]
@@ -53,7 +53,7 @@ df_raw_data.columns = [c.replace(' ', '') for c in df_raw_data.columns]
 
 # Replace Nulls
 
-# In[5]:
+# In[19]:
 
 
 df_raw_data_clean = df_raw_data.replace(np.nan, '', regex=True)
@@ -61,13 +61,13 @@ df_raw_data_clean = df_raw_data.replace(np.nan, '', regex=True)
 
 # Anonymise data
 
-# In[6]:
+# In[20]:
 
 
 df_raw_data_clean["AccountNumber"] = '************'+df_raw_data_clean["AccountNumber"].str[-4:]
 
 
-# In[7]:
+# In[21]:
 
 
 df_raw_data_clean["SourceFile"] = df_raw_data_clean["SourceFile"].str[-26:]
@@ -77,7 +77,7 @@ df_raw_data_clean["SourceFile"] = df_raw_data_clean["SourceFile"].str[-26:]
 
 # Test Connect to DB
 
-# In[8]:
+# In[22]:
 
 
 connection = psycopg2.connect(user=os.getenv('POSTGRES_USER'),
@@ -92,7 +92,7 @@ connection_test(connection)
 
 # Insert into Raw
 
-# In[10]:
+# In[23]:
 
 
 connection = psycopg2.connect(user=os.getenv('POSTGRES_USER'),
@@ -106,7 +106,7 @@ insert_values(connection,df_raw_data_clean,'etl.raw_txns')
 
 # Call ETL proc
 
-# In[11]:
+# In[25]:
 
 
 connection = psycopg2.connect(user=os.getenv('POSTGRES_USER'),
@@ -121,14 +121,14 @@ execute_proc(connection,'etl.RawToStd()')
 
 # Read in logging
 
-# In[12]:
+# In[26]:
 
 
 query = 'select recordcount,AffectedTable,calledproc from  etl.log l inner join (select max(id) as max_id from etl.log) m on l.id = m.max_id'
 column_names = ['recordcount','AffectedTable','calledproc']
 
 
-# In[15]:
+# In[27]:
 
 
 connection = psycopg2.connect(user=os.getenv('POSTGRES_USER'),
@@ -141,7 +141,7 @@ connection = psycopg2.connect(user=os.getenv('POSTGRES_USER'),
 log = postgresql_to_dataframe(connection, query, column_names)
 
 
-# In[27]:
+# In[28]:
 
 
 print(log.recordcount.map(str)+' rows inserted into '+log.AffectedTable.map(str)+' by '+log.calledproc.map(str))
@@ -149,7 +149,7 @@ print(log.recordcount.map(str)+' rows inserted into '+log.AffectedTable.map(str)
 
 # Convert to py script
 
-# In[25]:
+# In[29]:
 
 
 get_ipython().system('jupyter nbconvert --to script ETL.ipynb')
