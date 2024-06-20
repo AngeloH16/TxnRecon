@@ -13,9 +13,9 @@ AS $$
     select   
              cast(TransactionDate as date) as TransactionDate
             ,NULLIF(Narration,'') as Narration
-            ,cast(NULLIF(Debit,'')as Money) as Debit
-            ,cast(NULLIF(Credit,'')as Money) as Credit
-            ,cast(NULLIF(Balance,'')as Money) as Balance
+            ,cast(NULLIF(Debit,'')as decimal(19,2)) as Debit
+            ,cast(NULLIF(Credit,'')as decimal(19,2)) as Credit
+            ,cast(NULLIF(Balance,'')as decimal(19,2)) as Balance
             ,NULLIF(sourcefile,'') as SourceFile
             ,NULLIF(source,'') as source
     from etl.raw_txns
@@ -54,9 +54,9 @@ from ( select *, ROW_NUMBER () over (partition by TransactionDate
                                 full join etl.std_txns std 
                                 on              COALESCE(stg.TransactionDate,'31-12-2100') = COALESCE(std.TransactionDate,'31-12-2100')
                                                 and COALESCE(stg.Narration      ,'') = COALESCE(std.Narration      ,'')
-                                                and COALESCE(stg.Debit          ,'') = COALESCE(std.Debit          ,'')
-                                                and COALESCE(stg.Credit         ,'') = COALESCE(std.Credit         ,'')
-                                                and COALESCE(stg.Balance        ,'') = COALESCE(std.Balance        ,'')
+                                                and COALESCE(stg.Debit          ,0) = COALESCE(std.Debit          ,0)
+                                                and COALESCE(stg.Credit         ,0) = COALESCE(std.Credit         ,0)
+                                                and COALESCE(stg.Balance        ,0) = COALESCE(std.Balance        ,0)
                         where std.ID is null) x
         
 
@@ -83,12 +83,21 @@ from ( select *, ROW_NUMBER () over (partition by TransactionDate
                         full join etl.std_txns std 
                         on              COALESCE(stg.TransactionDate,'31-12-2100') = COALESCE(std.TransactionDate,'31-12-2100')
                                         and COALESCE(stg.Narration      ,'') = COALESCE(std.Narration      ,'')
-                                        and COALESCE(stg.Debit          ,'') = COALESCE(std.Debit          ,'')
-                                        and COALESCE(stg.Credit         ,'') = COALESCE(std.Credit         ,'')
-                                        and COALESCE(stg.Balance        ,'') = COALESCE(std.Balance        ,'')
+                                        and COALESCE(stg.Debit          ,0) = COALESCE(std.Debit          ,0)
+                                        and COALESCE(stg.Credit         ,0) = COALESCE(std.Credit         ,0)
+                                        and COALESCE(stg.Balance        ,0) = COALESCE(std.Balance        ,0)
                 where std.ID is null) x
                 ;
-    truncate table etl.stg_txns;
-    truncate table etl.raw_txns;
+    
+update etl.std_txns
+        set narration = upper(narration);
+
+update  etl.std_txns
+        set debit = debit * -1  
+        where debit < '0'
+        and source = 'CBA';
+
+truncate table etl.stg_txns;
+truncate table etl.raw_txns;
 
 $$;

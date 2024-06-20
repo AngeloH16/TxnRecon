@@ -20,9 +20,9 @@ CREATE TABLE etl.stg_txns (
      STG_ID             SERIAL PRIMARY KEY
     ,TransactionDate    date
     ,Narration          varchar(5000)
-    ,Debit              money
-    ,Credit             money
-    ,Balance            money
+    ,Debit              decimal(19,2)
+    ,Credit             decimal(19,2)
+    ,Balance            decimal(19,2)
     ,SourceFile         varchar(5000)
     ,Source             varchar(5000)
     ,FileRank           int
@@ -33,9 +33,9 @@ CREATE TABLE etl.std_txns (
      ID                 SERIAL PRIMARY KEY
     ,TransactionDate    date
     ,Narration          varchar(5000)
-    ,Debit              money
-    ,Credit             money
-    ,Balance            money
+    ,Debit              decimal(19,2)
+    ,Credit             decimal(19,2)
+    ,Balance            decimal(19,2)
     ,load_dt            timestamp 
     ,SourceFile         varchar(5000)
     ,Source             varchar(5000)
