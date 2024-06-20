@@ -13,37 +13,32 @@ CREATE TABLE etl.raw_txns (
     ,Balance            varchar(5000)
     ,TransactionType    varchar(5000)
     ,SourceFile         varchar(5000)
+    ,Source             varchar(5000)
     );
 DROP TABLE IF EXISTS etl.stg_txns;
 CREATE TABLE etl.stg_txns (
      STG_ID             SERIAL PRIMARY KEY
-    ,BSBNumber          varchar(5000)
-    ,AccountNumber      varchar(5000)
     ,TransactionDate    date
     ,Narration          varchar(5000)
-    ,Cheque             money
     ,Debit              money
     ,Credit             money
     ,Balance            money
-    ,TransactionType    varchar(5000)
     ,SourceFile         varchar(5000)
+    ,Source             varchar(5000)
     ,FileRank           int
     );
 
 DROP TABLE IF EXISTS etl.std_txns;
 CREATE TABLE etl.std_txns (
      ID                 SERIAL PRIMARY KEY
-    ,BSBNumber          varchar(5000)
-    ,AccountNumber      varchar(5000)
     ,TransactionDate    date
     ,Narration          varchar(5000)
-    ,Cheque             money
     ,Debit              money
     ,Credit             money
     ,Balance            money
-    ,TransactionType    varchar(5000)
     ,load_dt            timestamp 
     ,SourceFile         varchar(5000)
+    ,Source             varchar(5000)
     );
 
 DROP TABLE IF EXISTS etl.log;
