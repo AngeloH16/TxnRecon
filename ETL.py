@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[15]:
+# In[63]:
 
 
 # CSV Data Ingestion
@@ -19,33 +19,68 @@ import psycopg2.extras as extras
 import numpy as np
 from pathlib import Path
 from tkinter import filedialog
+import warnings
+warnings.filterwarnings('ignore')
 
 
 # Concat all CSVs in data file to one df
 
-# In[16]:
+# In[64]:
 
 
 directory = filedialog.askdirectory()
 files = glob.glob(directory+"/*.csv")
 
 
-# In[17]:
+# In[65]:
 
 
-df_raw_data = pd.DataFrame()
-
+df_raw_data_BW = pd.DataFrame()
+df_raw_data_CBA = pd.DataFrame()
 
 for csv in files:
-    frame = pd.read_csv(csv)
-    frame['SourceFile'] = os.path.basename(csv)
-    df_raw_data = pd.concat([df_raw_data,frame])
-    
+    if '5229' in os.path.basename(csv):
+        frame = pd.read_csv(csv)
+        frame['SourceFile'] = os.path.basename(csv)
+        df_raw_data_BW = pd.concat([df_raw_data_BW,frame])
+        df_raw_data_BW['Source'] = 'BankWest'
+    else:
+        frame = pd.read_csv(csv,header=None)
+        frame['SourceFile'] = os.path.basename(csv)
+        df_raw_data_CBA = pd.concat([df_raw_data_CBA,frame])
+        df_raw_data_CBA['Source'] = 'CBA'    
+
+
+# Clean datasets to same format
+
+# In[72]:
+
+
+if df_raw_data_CBA.empty:
+    print("No CBA data - skipping import")
+elif df_raw_data_BW.empty:
+        print("No BankWest data found")
+else:
+    df_raw_data_CBA.rename(columns={0: "Transaction Date", 1: "Amount",2:"Narration",3:"Balance"}, inplace=True)
+
+    df_raw_data_CBA_CR = df_raw_data_CBA[df_raw_data_CBA['Amount'] >= 0]
+    df_raw_data_CBA_CR.rename(columns={"Amount": "Credit"}, inplace=True)
+
+    df_raw_data_CBA_DR = df_raw_data_CBA[df_raw_data_CBA['Amount'] < 0]
+    df_raw_data_CBA_DR.rename(columns={"Amount": "Debit"}, inplace=True)
+
+
+# Append dataframes   
+
+# In[54]:
+
+
+df_raw_data = pd.concat([df_raw_data_BW, df_raw_data_CBA_CR,df_raw_data_CBA_DR], axis=0, ignore_index=True) 
 
 
 # Clean column names for whitespace
 
-# In[18]:
+# In[55]:
 
 
 df_raw_data.columns = [c.replace(' ', '') for c in df_raw_data.columns]
@@ -53,7 +88,7 @@ df_raw_data.columns = [c.replace(' ', '') for c in df_raw_data.columns]
 
 # Replace Nulls
 
-# In[19]:
+# In[57]:
 
 
 df_raw_data_clean = df_raw_data.replace(np.nan, '', regex=True)
@@ -61,13 +96,13 @@ df_raw_data_clean = df_raw_data.replace(np.nan, '', regex=True)
 
 # Anonymise data
 
-# In[20]:
+# In[58]:
 
 
 df_raw_data_clean["AccountNumber"] = '************'+df_raw_data_clean["AccountNumber"].str[-4:]
 
 
-# In[21]:
+# In[59]:
 
 
 df_raw_data_clean["SourceFile"] = df_raw_data_clean["SourceFile"].str[-26:]
@@ -149,7 +184,7 @@ print(log.recordcount.map(str)+' rows inserted into '+log.AffectedTable.map(str)
 
 # Convert to py script
 
-# In[29]:
+# In[74]:
 
 
 get_ipython().system('jupyter nbconvert --to script ETL.ipynb')
